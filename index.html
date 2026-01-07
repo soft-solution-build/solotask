@@ -1,0 +1,1458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Solotask — See One Task. Do One Task. Done.</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,700&family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,600;0,9..144,700;1,9..144,400&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #0a0a0a;
+            --bg-secondary: #141414;
+            --text-primary: #fafafa;
+            --text-secondary: #888;
+            --accent: #22c55e;
+            --accent-glow: rgba(34, 197, 94, 0.3);
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        /* Noise texture overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 24px;
+        }
+
+        /* Header */
+        header {
+            padding: 24px 0;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(20px);
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--accent);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1rem;
+            font-weight: 700;
+            font-family: 'DM Sans', sans-serif;
+        }
+
+        .logo-text {
+            display: flex;
+            align-items: baseline;
+        }
+
+        .logo-single {
+            font-family: 'DM Sans', sans-serif;
+            font-weight: 400;
+            color: var(--text-secondary);
+        }
+
+        .logo-task {
+            font-family: 'Fraunces', serif;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        .nav-cta {
+            background: var(--text-primary);
+            color: var(--bg-primary);
+            padding: 12px 24px;
+            border-radius: 100px;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-cta:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 120px 24px 80px;
+            position: relative;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 600px;
+            height: 600px;
+            background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0.4;
+            pointer-events: none;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 8px 16px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            margin-bottom: 32px;
+            animation: fadeInUp 0.8s ease;
+        }
+
+        .hero-badge-dot {
+            width: 8px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .hero h1 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(3rem, 8vw, 5.5rem);
+            font-weight: 700;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 24px;
+            animation: fadeInUp 0.8s ease 0.1s both;
+        }
+
+        .hero h1 span {
+            color: var(--accent);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2.5vw, 1.35rem);
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 48px;
+            animation: fadeInUp 0.8s ease 0.2s both;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .hero-form {
+            display: flex;
+            gap: 12px;
+            animation: fadeInUp 0.8s ease 0.3s both;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .hero-form input {
+            padding: 16px 24px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 100px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            width: 300px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .hero-form input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .hero-form input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .hero-form button {
+            padding: 16px 32px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .hero-form button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .hero-note {
+            margin-top: 16px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            animation: fadeInUp 0.8s ease 0.4s both;
+        }
+
+        /* Problem Section */
+        .problem {
+            padding: 120px 0;
+            position: relative;
+        }
+
+        .section-label {
+            font-size: 0.8rem;
+            font-weight: 500;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .problem h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 48px;
+            max-width: 700px;
+        }
+
+        .problem-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+        }
+
+        .problem-card {
+            background: var(--bg-secondary);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 32px;
+            transition: all 0.3s ease;
+        }
+
+        .problem-card:hover {
+            border-color: rgba(255,255,255,0.15);
+            transform: translateY(-4px);
+        }
+
+        .problem-card-icon {
+            width: 48px;
+            height: 48px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+        }
+
+        .problem-card h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .problem-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* Solution Section */
+        .solution {
+            padding: 120px 0;
+            background: linear-gradient(180deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+        }
+
+        .solution-content {
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .solution h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 24px;
+        }
+
+        .solution-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 64px;
+        }
+
+        /* App Demo */
+        .app-demo {
+            background: var(--bg-primary);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 48px;
+            max-width: 500px;
+            margin: 0 auto;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.5);
+        }
+
+        .app-demo-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            padding-bottom: 24px;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .app-demo-title {
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .app-demo-count {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            background: rgba(255,255,255,0.05);
+            padding: 4px 12px;
+            border-radius: 100px;
+        }
+
+        .current-task {
+            text-align: center;
+            padding: 40px 0;
+            position: relative;
+            overflow: hidden;
+            min-height: 200px;
+        }
+
+        .task-slide {
+            position: absolute;
+            top: 40px;
+            left: 0;
+            right: 0;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.5s ease;
+        }
+
+        .task-slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .task-slide.exit {
+            opacity: 0;
+            transform: translateX(-100%);
+        }
+
+        .button-container {
+            text-align: center;
+            padding-bottom: 20px;
+        }
+
+        .progress-bar {
+            height: 4px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 2px;
+            margin: 0 0 24px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--accent) 0%, #16a34a 100%);
+            border-radius: 2px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Completion Screen */
+        .completion-screen {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .completion-content {
+            text-align: center;
+        }
+
+        .completion-icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            animation: bounce 0.6s ease;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.2); }
+        }
+
+        .completion-title {
+            font-family: 'Fraunces', serif;
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 8px;
+        }
+
+        .completion-subtitle {
+            color: var(--text-secondary);
+            font-size: 1rem;
+            margin-bottom: 24px;
+        }
+
+        .completion-stats {
+            display: flex;
+            justify-content: center;
+            gap: 32px;
+            margin-bottom: 24px;
+        }
+
+        .stat {
+            text-align: center;
+        }
+
+        .stat-number {
+            display: block;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        .restart-btn {
+            background: rgba(255,255,255,0.1);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: var(--text-primary);
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .restart-btn:hover {
+            background: rgba(255,255,255,0.15);
+            border-color: var(--accent);
+        }
+
+        .current-task-label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--accent);
+            margin-bottom: 16px;
+        }
+
+        .current-task-text {
+            font-family: 'Fraunces', serif;
+            font-size: 1.75rem;
+            font-weight: 600;
+            margin-bottom: 32px;
+        }
+
+        .task-complete-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            background: var(--warning);
+            color: var(--bg-primary);
+            padding: 16px 32px;
+            border-radius: 100px;
+            font-weight: 600;
+            font-size: 1rem;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .task-complete-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px rgba(245, 158, 11, 0.4);
+        }
+
+        .task-complete-btn.completed {
+            background: var(--accent);
+        }
+
+        .task-complete-btn.completed:hover {
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        .btn-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-icon-square {
+            width: 14px;
+            height: 14px;
+            border: 2px solid var(--bg-primary);
+            border-radius: 3px;
+        }
+
+        .btn-icon-check {
+            display: none;
+        }
+
+        .task-complete-btn.completed .btn-icon-square {
+            display: none;
+        }
+
+        .task-complete-btn.completed .btn-icon-check {
+            display: block;
+        }
+
+        .task-queue {
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .task-queue-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 0;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .task-queue-blur {
+            filter: blur(4px);
+            user-select: none;
+        }
+
+        .task-queue-icon {
+            width: 20px;
+            height: 20px;
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 50%;
+        }
+
+        /* Features Section */
+        .features {
+            padding: 120px 0;
+        }
+
+        .features h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 600;
+            line-height: 1.2;
+            margin-bottom: 64px;
+            text-align: center;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 32px;
+        }
+
+        .feature-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.03) 0%, rgba(255,255,255,0.01) 100%);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 40px;
+            transition: all 0.3s ease;
+        }
+
+        .feature-card:hover {
+            border-color: var(--accent);
+            transform: translateY(-4px);
+        }
+
+        .feature-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--accent) 0%, #16a34a 100%);
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+        }
+
+        .feature-card h3 {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+        }
+
+        .feature-card p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.7;
+        }
+
+        /* How It Works */
+        .how-it-works {
+            padding: 120px 0;
+            background: var(--bg-secondary);
+        }
+
+        .how-it-works h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3rem);
+            font-weight: 600;
+            text-align: center;
+            margin-bottom: 64px;
+        }
+
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .step {
+            display: flex;
+            gap: 24px;
+            position: relative;
+        }
+
+        .step-number {
+            width: 48px;
+            height: 48px;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 2;
+        }
+
+        .step-line {
+            position: absolute;
+            left: 23px;
+            top: 48px;
+            width: 2px;
+            height: calc(100% - 48px);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .step:last-child .step-line {
+            display: none;
+        }
+
+        .step-content {
+            padding-bottom: 48px;
+        }
+
+        .step-content h3 {
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-content p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        /* CTA Section */
+        .cta {
+            padding: 120px 0;
+            text-align: center;
+            position: relative;
+        }
+
+        .cta::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 800px;
+            height: 400px;
+            background: radial-gradient(ellipse, var(--accent-glow) 0%, transparent 70%);
+            opacity: 0.3;
+            pointer-events: none;
+        }
+
+        .cta h2 {
+            font-family: 'Fraunces', serif;
+            font-size: clamp(2rem, 5vw, 3.5rem);
+            font-weight: 600;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        .cta-subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            margin-bottom: 48px;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+            position: relative;
+        }
+
+        .cta-form {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            flex-wrap: wrap;
+            position: relative;
+        }
+
+        .cta-form input {
+            padding: 18px 28px;
+            font-size: 1rem;
+            border: 1px solid rgba(255,255,255,0.15);
+            border-radius: 100px;
+            background: rgba(255,255,255,0.05);
+            color: var(--text-primary);
+            width: 320px;
+            outline: none;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .cta-form input:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px var(--accent-glow);
+        }
+
+        .cta-form input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .cta-form button {
+            padding: 18px 36px;
+            font-size: 1rem;
+            font-weight: 600;
+            background: var(--accent);
+            color: var(--bg-primary);
+            border: none;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: inherit;
+        }
+
+        .cta-form button:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 40px var(--accent-glow);
+        }
+
+        /* Footer */
+        footer {
+            padding: 48px 0;
+            border-top: 1px solid rgba(255,255,255,0.08);
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s ease;
+        }
+
+        footer a:hover {
+            color: var(--text-primary);
+        }
+
+        /* Success Message */
+        .success-message {
+            display: none;
+            background: rgba(34, 197, 94, 0.1);
+            border: 1px solid var(--accent);
+            border-radius: 12px;
+            padding: 16px 24px;
+            margin-top: 16px;
+            color: var(--accent);
+            font-weight: 500;
+        }
+
+        .success-message.show {
+            display: block;
+            animation: fadeInUp 0.5s ease;
+        }
+
+        /* Confetti Animation */
+        .confetti-container {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .confetti {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            opacity: 0;
+        }
+
+        .confetti.animate {
+            animation: confetti-fall 1s ease-out forwards;
+        }
+
+        @keyframes confetti-fall {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) rotate(0deg) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--x), var(--y)) rotate(720deg) scale(0);
+            }
+        }
+
+        .celebration-text {
+            position: absolute;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent);
+            opacity: 0;
+            white-space: nowrap;
+            pointer-events: none;
+        }
+
+        .celebration-text.animate {
+            animation: celebration-pop 1.5s ease-out forwards;
+        }
+
+        @keyframes celebration-pop {
+            0% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(20px) scale(0.5);
+            }
+            20% {
+                opacity: 1;
+                transform: translateX(-50%) translateY(0) scale(1.2);
+            }
+            40% {
+                transform: translateX(-50%) translateY(0) scale(1);
+            }
+            100% {
+                opacity: 0;
+                transform: translateX(-50%) translateY(-30px) scale(1);
+            }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .hero-form input {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .hero-form button {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .app-demo {
+                padding: 32px 24px;
+            }
+
+            .cta-form {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .cta-form input {
+                width: 100%;
+                max-width: 320px;
+            }
+
+            .cta-form button {
+                width: 100%;
+                max-width: 320px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">1</div>
+                    <div class="logo-text">
+                        <span class="logo-single">Solo</span><span class="logo-task">Task</span>
+                    </div>
+                </div>
+                <a href="#join" class="nav-cta">Get Early Access</a>
+            </div>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <div class="hero-badge">
+                <span class="hero-badge-dot"></span>
+                Coming Soon — Join the Waitlist
+            </div>
+            <h1>See One Task.<br>Do One Task.<br><span>Done.</span></h1>
+            <p class="hero-subtitle">
+                Stop drowning in endless to-do lists. Solotask shows you only one task at a time — 
+                no distractions, no overwhelm, just focus.
+            </p>
+            <form class="hero-form" id="heroForm">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit">Join Waitlist</button>
+            </form>
+            <p class="hero-note">Free early access. No spam, ever.</p>
+            <div class="success-message" id="heroSuccess">
+                🎉 You're on the list! We'll notify you when Solotask launches.
+            </div>
+        </div>
+    </section>
+
+    <section class="problem">
+        <div class="container">
+            <p class="section-label">The Problem</p>
+            <h2>Your brain wasn't built for 47 open tabs and 100+ tasks</h2>
+            <div class="problem-grid">
+                <div class="problem-card">
+                    <div class="problem-card-icon">🔥</div>
+                    <h3>Constant Overwhelm</h3>
+                    <p>Looking at your full task list triggers anxiety. You don't know where to start, so you don't start at all.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-card-icon">🔀</div>
+                    <h3>Task Switching</h3>
+                    <p>Every switch costs you 23 minutes of focus. By noon, you've "worked" 4 hours but finished nothing.</p>
+                </div>
+                <div class="problem-card">
+                    <div class="problem-card-icon">📋</div>
+                    <h3>Priority Paralysis</h3>
+                    <p>When everything feels urgent, nothing gets prioritized. You end up doing easy tasks, not important ones.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="solution">
+        <div class="container">
+            <div class="solution-content">
+                <p class="section-label">The Solution</p>
+                <h2>One task. Total clarity.</h2>
+                <p class="solution-subtitle">
+                    Solotask hides your entire list and shows only the task that matters right now. 
+                    Finish it, then move on. Simple.
+                </p>
+            </div>
+            <div class="app-demo">
+                <div class="app-demo-header">
+                    <span class="app-demo-title">Wednesday, Dec 24</span>
+                    <span class="app-demo-count">Task <span id="currentTaskNum">1</span> of 8</span>
+                </div>
+                <div class="current-task" id="taskContainer">
+                    <div class="task-slide active" data-task="1">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Reply to client emails</p>
+                    </div>
+                    <div class="task-slide" data-task="2">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Review Q4 sales report</p>
+                    </div>
+                    <div class="task-slide" data-task="3">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Prepare client presentation</p>
+                    </div>
+                    <div class="task-slide" data-task="4">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Call supplier about delivery</p>
+                    </div>
+                    <div class="task-slide" data-task="5">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Update project timeline</p>
+                    </div>
+                    <div class="task-slide" data-task="6">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Review team feedback</p>
+                    </div>
+                    <div class="task-slide" data-task="7">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Send weekly report</p>
+                    </div>
+                    <div class="task-slide" data-task="8">
+                        <p class="current-task-label">Focus Now</p>
+                        <p class="current-task-text">Plan tomorrow's priorities</p>
+                    </div>
+                    <div class="task-slide completion-screen" data-task="done">
+                        <div class="completion-content">
+                            <div class="completion-icon">🏆</div>
+                            <p class="completion-title">All Done!</p>
+                            <p class="completion-subtitle">You completed 8 tasks today</p>
+                            <div class="completion-stats">
+                                <div class="stat">
+                                    <span class="stat-number">8</span>
+                                    <span class="stat-label">Tasks</span>
+                                </div>
+                                <div class="stat">
+                                    <span class="stat-number">100%</span>
+                                    <span class="stat-label">Complete</span>
+                                </div>
+                            </div>
+                            <button class="restart-btn" id="restartDemo">Try Again</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="button-container" id="buttonContainer">
+                    <button class="task-complete-btn" id="completeBtn">
+                        <span class="btn-icon">
+                            <span class="btn-icon-square"></span>
+                            <span class="btn-icon-check">✓</span>
+                        </span>
+                        <span class="btn-text">Mark Complete</span>
+                    </button>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progressFill"></div>
+                </div>
+                <div class="task-queue">
+                    <div class="task-queue-item task-queue-blur">
+                        <span class="task-queue-icon"></span>
+                        <span>Next task is hidden...</span>
+                    </div>
+                    <div class="task-queue-item task-queue-blur">
+                        <span class="task-queue-icon"></span>
+                        <span>Stay focused on current task</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="features">
+        <div class="container">
+            <h2>Designed for focus, not features</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">🚫</div>
+                    <h3>No Skipping</h3>
+                    <p>Can't skip to an easier task. Want to skip? You'll need to explain why — building accountability into every decision.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👁️</div>
+                    <h3>Hidden Queue</h3>
+                    <p>Your other tasks exist, but you can't see them. No peeking. No anxiety from a mile-long list staring back at you.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🔒</div>
+                    <h3>Locked Priorities</h3>
+                    <p>Set your priorities once (tonight or morning). During work time, you can't reshuffle — just execute.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">👥</div>
+                    <h3>Team Mode</h3>
+                    <p>For teams: managers add tasks, workers see only one at a time. No micromanaging, no chaos — just clarity.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">🤝</div>
+                    <h3>Priority Buddy</h3>
+                    <p>Stuck prioritizing? Let a colleague (or AI) sort your tasks. You focus on doing, not deciding.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">📊</div>
+                    <h3>Completion Stats</h3>
+                    <p>See what you actually finished, not what you planned. Build momentum by watching your done list grow.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="how-it-works">
+        <div class="container">
+            <h2>How it works</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <div class="step-line"></div>
+                    <div class="step-content">
+                        <h3>Brain dump your tasks</h3>
+                        <p>Add everything on your mind. From big projects to small errands — get it all out of your head.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <div class="step-line"></div>
+                    <div class="step-content">
+                        <h3>Prioritize (once)</h3>
+                        <p>Sort your tasks for tomorrow. Do it tonight or first thing in the morning. Then lock it in.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <div class="step-line"></div>
+                    <div class="step-content">
+                        <h3>Focus mode: ON</h3>
+                        <p>Solotask reveals just one task. Complete it. Then the next one appears. Repeat until done.</p>
+                    </div>
+                </div>
+                <div class="step">
+                    <div class="step-number">4</div>
+                    <div class="step-content">
+                        <h3>Feel accomplished</h3>
+                        <p>End your day knowing exactly what you achieved. No "busy" days with nothing to show.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="cta" id="join">
+        <div class="container">
+            <h2>Ready to actually finish things?</h2>
+            <p class="cta-subtitle">
+                Join the waitlist for early access. Be first to try Singletask when we launch.
+            </p>
+            <form class="cta-form" id="ctaForm">
+                <input type="email" placeholder="Enter your email" required>
+                <button type="submit">Join Waitlist</button>
+            </form>
+            <div class="success-message" id="ctaSuccess">
+                🎉 You're on the list! We'll notify you when Solotask launches.
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <p>© 2026 Solotask. Built for people who want to finish, not just start.</p>
+        </div>
+    </footer>
+
+    <script>
+        // Form handling
+        document.querySelectorAll('form').forEach(form => {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const email = this.querySelector('input[type="email"]').value;
+                const successId = this.id === 'heroForm' ? 'heroSuccess' : 'ctaSuccess';
+                
+                // Here you would normally send to your backend
+                console.log('Email submitted:', email);
+                
+                // Show success message
+                document.getElementById(successId).classList.add('show');
+                this.querySelector('input').value = '';
+                
+                // Hide after 5 seconds
+                setTimeout(() => {
+                    document.getElementById(successId).classList.remove('show');
+                }, 5000);
+            });
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+            });
+        });
+
+        // Confetti creation function
+        function createConfetti(container) {
+            const colors = ['#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#a855f7', '#ec4899'];
+            const shapes = ['●', '■', '▲', '★', '♦'];
+            
+            for (let i = 0; i < 30; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = '50%';
+                confetti.style.top = '50%';
+                confetti.style.fontSize = (Math.random() * 15 + 10) + 'px';
+                confetti.style.animationDelay = (Math.random() * 0.3) + 's';
+                confetti.style.animationDuration = (Math.random() * 0.5 + 0.8) + 's';
+                
+                // Random direction
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 150 + 50;
+                const x = Math.cos(angle * Math.PI / 180) * distance;
+                const y = Math.sin(angle * Math.PI / 180) * distance;
+                confetti.style.setProperty('--x', x + 'px');
+                confetti.style.setProperty('--y', y + 'px');
+                
+                container.appendChild(confetti);
+                
+                // Trigger animation
+                setTimeout(() => confetti.classList.add('animate'), 10);
+                
+                // Remove after animation
+                setTimeout(() => confetti.remove(), 1500);
+            }
+        }
+
+        // Big celebration confetti for completion
+        function createBigCelebration(container) {
+            const colors = ['#22c55e', '#f59e0b', '#3b82f6', '#ef4444', '#a855f7', '#ec4899', '#fbbf24', '#14b8a6'];
+            const shapes = ['●', '■', '▲', '★', '♦', '🎉', '🎊', '✨'];
+            
+            for (let i = 0; i < 60; i++) {
+                const confetti = document.createElement('div');
+                confetti.className = 'confetti';
+                confetti.textContent = shapes[Math.floor(Math.random() * shapes.length)];
+                confetti.style.color = colors[Math.floor(Math.random() * colors.length)];
+                confetti.style.left = '50%';
+                confetti.style.top = '50%';
+                confetti.style.fontSize = (Math.random() * 20 + 15) + 'px';
+                confetti.style.animationDelay = (Math.random() * 0.5) + 's';
+                confetti.style.animationDuration = (Math.random() * 1 + 1) + 's';
+                
+                // Random direction - bigger spread
+                const angle = Math.random() * 360;
+                const distance = Math.random() * 200 + 100;
+                const x = Math.cos(angle * Math.PI / 180) * distance;
+                const y = Math.sin(angle * Math.PI / 180) * distance;
+                confetti.style.setProperty('--x', x + 'px');
+                confetti.style.setProperty('--y', y + 'px');
+                
+                container.appendChild(confetti);
+                
+                // Trigger animation
+                setTimeout(() => confetti.classList.add('animate'), 10);
+                
+                // Remove after animation
+                setTimeout(() => confetti.remove(), 2500);
+            }
+        }
+
+        // Demo state
+        let currentTask = 1;
+        const totalTasks = 8;
+        let isAnimating = false;
+
+        const completeBtn = document.getElementById('completeBtn');
+        const btnText = completeBtn.querySelector('.btn-text');
+        const taskContainer = document.getElementById('taskContainer');
+        const currentTaskNum = document.getElementById('currentTaskNum');
+        const progressFill = document.getElementById('progressFill');
+        const buttonContainer = document.getElementById('buttonContainer');
+
+        // Celebration messages
+        const messages = ['🎉 Great job!', '⚡ Awesome!', '🔥 On fire!', '💪 Keep going!', '✨ Amazing!', '🚀 Crushing it!', '👏 Nice one!', '🌟 Fantastic!'];
+
+        function showCelebrationText(text) {
+            let celebrationText = taskContainer.querySelector('.celebration-text');
+            if (!celebrationText) {
+                celebrationText = document.createElement('div');
+                celebrationText.className = 'celebration-text';
+                taskContainer.appendChild(celebrationText);
+            }
+            
+            celebrationText.textContent = text;
+            celebrationText.classList.remove('animate');
+            void celebrationText.offsetWidth;
+            celebrationText.classList.add('animate');
+        }
+
+        function updateProgress() {
+            const progress = (currentTask / totalTasks) * 100;
+            progressFill.style.width = progress + '%';
+        }
+
+        function resetButton() {
+            completeBtn.classList.remove('completed');
+            btnText.textContent = 'Mark Complete';
+        }
+
+        function goToNextTask() {
+            const currentSlide = taskContainer.querySelector('.task-slide.active');
+            const nextSlide = taskContainer.querySelector(`.task-slide[data-task="${currentTask + 1}"]`);
+            const doneSlide = taskContainer.querySelector('.task-slide[data-task="done"]');
+            
+            // Exit current slide
+            currentSlide.classList.remove('active');
+            currentSlide.classList.add('exit');
+            
+            setTimeout(() => {
+                currentSlide.classList.remove('exit');
+                
+                if (currentTask < totalTasks) {
+                    // Show next task
+                    currentTask++;
+                    currentTaskNum.textContent = currentTask;
+                    nextSlide.classList.add('active');
+                    resetButton();
+                    updateProgress();
+                } else {
+                    // Show completion screen
+                    doneSlide.classList.add('active');
+                    buttonContainer.style.display = 'none';
+                    document.querySelector('.task-queue').style.display = 'none';
+                    progressFill.style.width = '100%';
+                    
+                    // Big celebration!
+                    let confettiContainer = taskContainer.querySelector('.confetti-container');
+                    if (!confettiContainer) {
+                        confettiContainer = document.createElement('div');
+                        confettiContainer.className = 'confetti-container';
+                        taskContainer.appendChild(confettiContainer);
+                    }
+                    createBigCelebration(confettiContainer);
+                }
+                
+                isAnimating = false;
+            }, 500);
+        }
+
+        // Complete button click
+        completeBtn.addEventListener('click', function() {
+            if (this.classList.contains('completed') || isAnimating) return;
+            isAnimating = true;
+            
+            // Mark as completed
+            this.classList.add('completed');
+            btnText.textContent = 'Completed!';
+            
+            // Create confetti container
+            let confettiContainer = taskContainer.querySelector('.confetti-container');
+            if (!confettiContainer) {
+                confettiContainer = document.createElement('div');
+                confettiContainer.className = 'confetti-container';
+                taskContainer.appendChild(confettiContainer);
+            }
+            
+            // Show celebration
+            const message = messages[Math.floor(Math.random() * messages.length)];
+            showCelebrationText(message);
+            createConfetti(confettiContainer);
+            
+            // Go to next task after delay
+            setTimeout(goToNextTask, 1000);
+        });
+
+        // Restart demo
+        document.getElementById('restartDemo').addEventListener('click', function() {
+            // Reset state
+            currentTask = 1;
+            currentTaskNum.textContent = 1;
+            progressFill.style.width = '0%';
+            buttonContainer.style.display = 'block';
+            document.querySelector('.task-queue').style.display = 'block';
+            
+            // Reset all slides
+            taskContainer.querySelectorAll('.task-slide').forEach(slide => {
+                slide.classList.remove('active', 'exit');
+            });
+            
+            // Show first task
+            taskContainer.querySelector('.task-slide[data-task="1"]').classList.add('active');
+            resetButton();
+        });
+
+        // Initialize progress
+        updateProgress();
+    </script>
+</body>
+</html>
