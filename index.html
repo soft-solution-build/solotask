@@ -268,6 +268,38 @@
             font-size: 0.85rem;
             color: var(--text-secondary);
             animation: fadeInUp 0.8s ease 0.4s both;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .hero-bonus {
+            color: var(--warning);
+            font-weight: 600;
+        }
+
+        .hero-bonus-divider {
+            color: var(--text-secondary);
+            opacity: 0.5;
+        }
+
+        .cta-bonus {
+            color: var(--warning);
+            font-weight: 600;
+            font-size: 1rem;
+            margin-bottom: 32px;
+            animation: pulse-glow 2s infinite;
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.7;
+            }
         }
 
         /* Problem Section */
@@ -1003,7 +1035,11 @@
                 <input type="email" placeholder="Enter your email" required>
                 <button type="submit">Join Waitlist</button>
             </form>
-            <p class="hero-note">Free early access. No spam, ever.</p>
+            <p class="hero-note">
+                <span class="hero-bonus">🎁 First 50 subscribers get 3 years FREE</span>
+                <span class="hero-bonus-divider">•</span>
+                No spam, ever.
+            </p>
             <div class="success-message" id="heroSuccess">
                 🎉 You're on the list! We'll notify you when Solotask launches.
             </div>
@@ -1208,8 +1244,9 @@
         <div class="container">
             <h2>Ready to actually finish things?</h2>
             <p class="cta-subtitle">
-                Join the waitlist for early access. Be first to try Singletask when we launch.
+                Join the waitlist for early access. Be first to try Solotask when we launch.
             </p>
+            <p class="cta-bonus">🎁 First 50 subscribers get 3 years FREE</p>
             <form class="cta-form" id="ctaForm">
                 <input type="email" placeholder="Enter your email" required>
                 <button type="submit">Join Waitlist</button>
